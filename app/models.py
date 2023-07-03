@@ -3,6 +3,7 @@ from sqlalchemy import (
     Column,
     String,
     Integer,
+    Boolean,
     ForeignKey
 )
 from sqlalchemy.orm import relationship
@@ -16,8 +17,7 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     username = Column(String, nullable=False)
 
     posts = relationship('Post', back_populates="user")
-    likes = relationship('Likes', back_populates='like')
-    dislike = relationship('Likes', back_populates='dislike')
+    likes = relationship('Likes', back_populates='user')
 
 
 class Post(Base):
@@ -44,9 +44,9 @@ class Likes(Base):
                     autoincrement=True
                     )
     post_id = Column(Integer, ForeignKey(Post.id))
-    liked = Column(Integer, ForeignKey(User.id))
-    disliked = Column(Integer, ForeignKey(User.id))
+    user_id = Column(Integer, ForeignKey(User.id))
+    liked = Column(Boolean)
+    disliked = Column(Boolean)
 
     post = relationship('Post', back_populates='likes')
-    like = relationship('User', back_populates='likes')
-    dislike = relationship('User', back_populates='dislikes')
+    user = relationship('User', back_populates='likes')

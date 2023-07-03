@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from posts.api.postCRUD import posts_router
+from likes.api.like import like_router
 
 from auth.schemas import UserRead, UserCreate
 from auth.base_config import auth_backend
@@ -11,6 +12,7 @@ app = FastAPI(
 )
 
 app.include_router(posts_router)
+app.include_router(like_router)
 
 app.include_router(
     fastapi_users.get_auth_router(auth_backend),
