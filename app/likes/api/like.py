@@ -27,23 +27,33 @@ async def put_a_like(
     db: AsyncSession = Depends(get_async_session),
 
 ):
+    if like is dislike:
+        raise HTTPException(400)
     try:
         post = await db.execute(select(Post).filter(Post.id == post_id))
         post = post.scalar_one()
         if post.user_id == current_user.id:
-            return HTTPException(400, 'You can`t like your own posts')
+            raise HTTPException(400, 'You can`t like your own posts')
 
-        already_rated = await db.execute(select(Likes).filter(
-            Likes.post_id == post_id,
-            Likes.user_id == current_user.id
-            ))
-        if already_rated.scalar_one():
-            return {'status': f'have you already evaluated post {post_id}'}
+        try:
+            already_rated = await db.execute(select(Likes).filter(
+                Likes.post_id == post_id,
+                Likes.user_id == current_user.id
+                ))
+            already_rated = already_rated.scalar_one()
+            if already_rated:
+                raise HTTPException(400, 'You can`t put a like or dislike to the post twice')  # noqa 501
+        except NoResultFound:
+            like = Likes(
+                post_id=post_id,
+                user_id=current_user.id,
+                liked=like,
+                disliked=dislike
+            )
 
-        like = Likes(post_id, current_user.user_id, liked=True, disliked=False)
+            db.add(like)
+            await db.commit()
+            return like
 
-        db.add(like)
-        await db.commit()
-        return {'status': f'you have liked the post {post_id}'}
     except NoResultFound:
-        return HTTPException(404, f'Post {post_id} not found')
+        raise HTTPException(404, f'Post {post_id} not found')
