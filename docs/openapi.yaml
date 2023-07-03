@@ -1,0 +1,446 @@
+info:
+  version: 0.1.0
+  title: Social Network
+components:
+  schemas:
+    PostSchemaGet:
+      required:
+      - user_id
+      - id
+      - title
+      - text
+      title: PostSchemaGet
+      type: object
+      properties:
+        text:
+          title: Text
+          type: string
+        title:
+          title: Title
+          type: string
+        id:
+          title: Id
+          type: integer
+        user_id:
+          title: User Id
+          type: integer
+    UserRead:
+      required:
+      - id
+      - email
+      - username
+      title: UserRead
+      type: object
+      description: Base User model.
+      properties:
+        email:
+          title: Email
+          type: string
+        is_superuser:
+          default: false
+          title: Is Superuser
+          type: boolean
+        is_active:
+          default: true
+          title: Is Active
+          type: boolean
+        id:
+          title: Id
+          type: integer
+        username:
+          title: Username
+          type: string
+        is_verified:
+          default: false
+          title: Is Verified
+          type: boolean
+    ErrorModel:
+      required:
+      - detail
+      title: ErrorModel
+      type: object
+      properties:
+        detail:
+          title: Detail
+          anyOf:
+          - type: string
+          - type: object
+            additionalProperties:
+              type: string
+    HTTPValidationError:
+      title: HTTPValidationError
+      type: object
+      properties:
+        detail:
+          title: Detail
+          type: array
+          items:
+            "$ref": "#/components/schemas/ValidationError"
+    ValidationError:
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+      type: object
+      properties:
+        msg:
+          title: Message
+          type: string
+        loc:
+          title: Location
+          type: array
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+        type:
+          title: Error Type
+          type: string
+    PostSchemaCreate:
+      required:
+      - title
+      - text
+      title: PostSchemaCreate
+      type: object
+      properties:
+        text:
+          title: Text
+          type: string
+        title:
+          title: Title
+          type: string
+    UserCreate:
+      required:
+      - email
+      - password
+      - username
+      title: UserCreate
+      type: object
+      properties:
+        email:
+          format: email
+          title: Email
+          type: string
+        password:
+          title: Password
+          type: string
+        is_superuser:
+          default: false
+          title: Is Superuser
+          type: boolean
+        is_active:
+          default: true
+          title: Is Active
+          type: boolean
+        username:
+          title: Username
+          type: string
+        is_verified:
+          default: false
+          title: Is Verified
+          type: boolean
+    Body_auth_jwt_login_auth_jwt_login_post:
+      required:
+      - username
+      - password
+      title: Body_auth_jwt_login_auth_jwt_login_post
+      type: object
+      properties:
+        password:
+          title: Password
+          type: string
+        grant_type:
+          pattern: password
+          title: Grant Type
+          type: string
+        client_secret:
+          title: Client Secret
+          type: string
+        client_id:
+          title: Client Id
+          type: string
+        scope:
+          default: ''
+          title: Scope
+          type: string
+        username:
+          title: Username
+          type: string
+    PostSchemaUpdate:
+      required:
+      - id
+      - title
+      - text
+      title: PostSchemaUpdate
+      type: object
+      properties:
+        text:
+          title: Text
+          type: string
+        title:
+          title: Title
+          type: string
+        id:
+          title: Id
+          type: integer
+  securitySchemes:
+    APIKeyCookie:
+      in: cookie
+      name: social
+      type: apiKey
+openapi: 3.1.0
+paths:
+  "/auth/jwt/logout":
+    post:
+      operationId: auth_jwt_logout_auth_jwt_logout_post
+      summary: Auth:Jwt.Logout
+      security:
+      - APIKeyCookie: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '204':
+          description: No Content
+        '401':
+          description: Missing token or inactive user.
+      tags:
+      - auth
+  "/auth/jwt/login":
+    post:
+      operationId: auth_jwt_login_auth_jwt_login_post
+      summary: Auth:Jwt.Login
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '204':
+          description: No Content
+        '400':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorModel"
+              examples:
+                LOGIN_USER_NOT_VERIFIED:
+                  summary: The user is not verified.
+                  value:
+                    detail: LOGIN_USER_NOT_VERIFIED
+                LOGIN_BAD_CREDENTIALS:
+                  summary: Bad credentials or the user is inactive.
+                  value:
+                    detail: LOGIN_BAD_CREDENTIALS
+          description: Bad Request
+        '422':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              "$ref": "#/components/schemas/Body_auth_jwt_login_auth_jwt_login_post"
+      tags:
+      - auth
+  "/delete_post/{post_id}":
+    delete:
+      parameters:
+      - required: true
+        in: path
+        name: post_id
+        schema:
+          title: Post Id
+          type: integer
+      operationId: delete_post_delete_post__post_id__delete
+      summary: Delete Post
+      security:
+      - APIKeyCookie: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      tags:
+      - post
+  "/get_user_posts":
+    get:
+      operationId: get_user_posts_get_user_posts_get
+      summary: Get User Posts
+      security:
+      - APIKeyCookie: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                title: Response Get User Posts Get User Posts Get
+                type: array
+                items:
+                  "$ref": "#/components/schemas/PostSchemaGet"
+          description: Successful Response
+      tags:
+      - post
+  "/like/{post_id}":
+    post:
+      parameters:
+      - required: true
+        in: path
+        name: post_id
+        schema:
+          title: Post Id
+          type: integer
+      - required: true
+        in: query
+        name: like
+        schema:
+          title: Like
+          type: boolean
+      - required: true
+        in: query
+        name: dislike
+        schema:
+          title: Dislike
+          type: boolean
+      operationId: put_a_like_like__post_id__post
+      summary: Put A Like
+      security:
+      - APIKeyCookie: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema: {}
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+  "/update_post":
+    put:
+      operationId: update_post_update_post_put
+      summary: Update Post
+      security:
+      - APIKeyCookie: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/PostSchemaGet"
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/PostSchemaUpdate"
+      tags:
+      - post
+  "/get_posts":
+    get:
+      operationId: get_posts_get_posts_get
+      summary: Get Posts
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                title: Response Get Posts Get Posts Get
+                type: array
+                items:
+                  "$ref": "#/components/schemas/PostSchemaGet"
+          description: Successful Response
+      tags:
+      - post
+  "/create_post":
+    post:
+      operationId: create_post_create_post_post
+      summary: Create Post
+      security:
+      - APIKeyCookie: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/PostSchemaCreate"
+          description: Successful Response
+        '422':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/PostSchemaCreate"
+      tags:
+      - post
+  "/auth/register":
+    post:
+      operationId: register_register_auth_register_post
+      summary: Register:Register
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/UserRead"
+          description: Successful Response
+        '400':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ErrorModel"
+              examples:
+                REGISTER_INVALID_PASSWORD:
+                  summary: Password validation failed.
+                  value:
+                    detail:
+                      reason: Password should beat least 3 characters
+                      code: REGISTER_INVALID_PASSWORD
+                REGISTER_USER_ALREADY_EXISTS:
+                  summary: A user with this email already exists.
+                  value:
+                    detail: REGISTER_USER_ALREADY_EXISTS
+          description: Bad Request
+        '422':
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/HTTPValidationError"
+          description: Validation Error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/UserCreate"
+      tags:
+      - auth

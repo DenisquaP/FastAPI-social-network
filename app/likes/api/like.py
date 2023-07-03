@@ -16,8 +16,9 @@ like_router = APIRouter()
 
 
 @like_router.post(
-    '/like/{post_id}',
-    status_code=201
+    '/like',
+    status_code=201,
+    tags=['estimate']
 )
 async def put_a_like(
     post_id: int,

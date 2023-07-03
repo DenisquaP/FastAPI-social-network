@@ -72,7 +72,7 @@ async def get_user_posts(
 
 
 @posts_router.delete(
-    '/delete_post/{post_id}',
+    '/delete_post',
     tags=['post'],
     status_code=200
 )

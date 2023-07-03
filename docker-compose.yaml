@@ -2,16 +2,21 @@ version: '3.8'
 
 services:
   postgres:
-      image: postgres
-      restart: always
-      environment:
-        - POSTGRES_USER=postgres
-        - POSTGRES_PASSWORD=postgres
-        - POSTGRES_DB=social_network_db
-      ports:
-        - '5432:5432'
-      networks:
-        - social_network
+    image: postgres
+    restart: always
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=social_network_db
+    ports:
+      - '5432:5432'
+    networks:
+      - social_network
 
 networks:
   social_network:
+
+volumes:
+  postgres_data:
